@@ -3,7 +3,6 @@ Basic Kivy pong game built using Kivy docs tutorial
 """
 
 import kivy
-from random import randint
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
@@ -15,6 +14,21 @@ from kivy.properties import (
 )
 
 kivy.require("2.1.0")
+
+
+class PongPaddle(Widget):
+    """
+    PongPaddle class to represent player paddles
+    """
+
+    score = NumericProperty(0)
+
+    def bounce_ball(self, ball):
+        if self.collide_widget(ball):
+            speedup = 1.1
+            offset = 0.02 * Vector(0, ball.center_y - self.center_y)
+            ball.velocity = speedup * (offset - ball.velocity)
+        return
 
 
 class PongBall(Widget):
@@ -38,21 +52,38 @@ class PongGame(Widget):
     """
 
     ball = ObjectProperty(None)
+    player1 = ObjectProperty(None)
+    player2 = ObjectProperty(None)
 
-    def serve_ball(self):
+    def on_touch_move(self, touch):
+        if touch.x < (self.width / 3):
+            self.player1.center_y = touch.y
+        if touch.x > (self.width - (self.width / 3)):
+            self.player2.center_y = touch.y
+
+    def serve_ball(self, vel=(4, 0)):
         self.ball.center = self.center
-        self.ball.velocity = Vector(4, 0).rotate(randint(0, 360))
+        self.ball.velocity = vel
 
     def update(self, dt):
         self.ball.move()
+
+        # player paddle bounce
+        self.player1.bounce_ball(self.ball)
+        self.player2.bounce_ball(self.ball)
 
         # bounce off top and bottom
         if (self.ball.y < 0) or (self.ball.top > self.height):
             self.ball.velocity_y *= -1
 
-        # bounce off of left and right sides
-        if (self.ball.x < 0) or (self.ball.right > self.width):
-            self.ball.velocity_x *= -1
+        # ball went past a player paddle and scored a point
+        if self.ball.x < self.x:
+            self.player2.score += 1
+            self.serve_ball(vel=(4, 0))
+        if self.ball.right > self.width:
+            self.player1.score += 1
+            self.serve_ball(vel=(4, 0))
+
         return
 
 
