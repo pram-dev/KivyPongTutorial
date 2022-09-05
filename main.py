@@ -28,7 +28,6 @@ class PongPaddle(Widget):
             speedup = 1.1
             offset = 0.02 * Vector(0, ball.center_y - self.center_y)
             ball.velocity = speedup * (offset - ball.velocity)
-        return
 
 
 class PongBall(Widget):
@@ -43,7 +42,6 @@ class PongBall(Widget):
 
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
-        return
 
 
 class PongGame(Widget):
@@ -54,12 +52,6 @@ class PongGame(Widget):
     ball = ObjectProperty(None)
     player1 = ObjectProperty(None)
     player2 = ObjectProperty(None)
-
-    def on_touch_move(self, touch):
-        if touch.x < (self.width / 3):
-            self.player1.center_y = touch.y
-        if touch.x > (self.width - (self.width / 3)):
-            self.player2.center_y = touch.y
 
     def serve_ball(self, vel=(4, 0)):
         self.ball.center = self.center
@@ -84,7 +76,11 @@ class PongGame(Widget):
             self.player1.score += 1
             self.serve_ball(vel=(4, 0))
 
-        return
+    def on_touch_move(self, touch):
+        if touch.x < (self.width / 3):
+            self.player1.center_y = touch.y
+        if touch.x > (self.width - (self.width / 3)):
+            self.player2.center_y = touch.y
 
 
 class PongApp(App):
